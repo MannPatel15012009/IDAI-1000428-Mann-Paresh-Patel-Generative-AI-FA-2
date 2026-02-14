@@ -1,61 +1,50 @@
+
 import streamlit as st
 import requests
+import json
+import pandas as pd
 from datetime import datetime
 from google import genai
+from io import BytesIO
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
-from io import BytesIO
 
-# -------------------------------------------------
+# =====================================================
 # PAGE CONFIG
-# -------------------------------------------------
+# =====================================================
 st.set_page_config(
-    page_title="🌾 AgroNova",
+    page_title="🌾 AgroNova Enterprise",
     page_icon="🌱",
     layout="wide"
 )
 
-# -------------------------------------------------
-# UI STYLE
-# -------------------------------------------------
+# =====================================================
+# CLEAN ENTERPRISE UI
+# =====================================================
 st.markdown("""
 <style>
-.stApp {
-    background: linear-gradient(135deg, #0c2f20, #071e14);
-    color: #e8f5ec;
-}
-.header {
-    background: #145c3a;
-    padding: 1.8rem;
-    border-radius: 16px;
-    margin-bottom: 1.5rem;
-}
-.card {
-    background: #0f3d28;
-    padding: 1.2rem;
-    border-radius: 12px;
-    margin-bottom: 1rem;
-}
-.stButton>button {
-    background: #22c55e;
-    border-radius: 8px;
-    border: none;
-    color: white;
-}
+.stApp { background: linear-gradient(135deg,#071e14,#0c2f20); color:#e8f5ec;}
+.block-container {max-width:1100px;padding-top:2rem;}
+.header {background:#145c3a;padding:2rem;border-radius:18px;margin-bottom:1.5rem;}
+.card {background:#0f3d28;padding:1.2rem;border-radius:12px;margin-bottom:1rem;}
+.recommendation {background:#0c3323;padding:1.2rem;border-radius:10px;border-left:4px solid #22c55e;margin-bottom:0.8rem;}
+.safe {color:#22c55e;font-weight:bold;}
+.warn {color:#facc15;font-weight:bold;}
+.danger {color:#ef4444;font-weight:bold;}
 </style>
 """, unsafe_allow_html=True)
 
 st.markdown("""
 <div class="header">
-<h1>🌾 AgroNova</h1>
-<p>Weather-Aware • Multimodal • AI Smart Farming System</p>
+<h1>🌾 AgroNova Enterprise AI</h1>
+<p>Elite Smart Farming Intelligence Platform</p>
 </div>
 """, unsafe_allow_html=True)
 
-# -------------------------------------------------
-# GOOGLE API
-# -------------------------------------------------
+# =====================================================
+# API INITIALIZATION
+# =====================================================
 if "GOOGLE_API_KEY" not in st.secrets:
     st.error("Add GOOGLE_API_KEY in Streamlit Secrets.")
     st.stop()
@@ -63,214 +52,190 @@ if "GOOGLE_API_KEY" not in st.secrets:
 client = genai.Client(api_key=st.secrets["GOOGLE_API_KEY"])
 MODEL_NAME = "gemini-3-flash-preview"
 
-# -------------------------------------------------
-# LOCATION API FUNCTIONS
-# -------------------------------------------------
-@st.cache_data
-def get_states(country):
-    url = "https://countriesnow.space/api/v0.1/countries/states"
-    response = requests.post(url, json={"country": country})
-    data = response.json()
-    if data["error"] == False:
-        return [state["name"] for state in data["data"]["states"]]
-    return []
-
-@st.cache_data
-def get_districts(country, state):
-    url = "https://countriesnow.space/api/v0.1/countries/state/cities"
-    response = requests.post(url, json={
-        "country": country,
-        "state": state
-    })
-    data = response.json()
-    if data["error"] == False:
-        return data["data"]
-    return []
-
-# -------------------------------------------------
-# SIDEBAR
-# -------------------------------------------------
-with st.sidebar:
-    st.header("Farm Configuration")
-
-    country = st.selectbox(
-        "Country",
-        ["India", "Ghana", "Canada", "USA", "Brazil", "Australia"]
-    )
-
-    states = get_states(country)
-    state = st.selectbox("State / Province", states) if states else None
-
-    districts = get_districts(country, state) if state else []
-    district = st.selectbox("District", districts) if districts else None
-
-    crop_stage = st.selectbox(
-        "Crop Stage",
-        ["Planning", "Sowing", "Growing", "Harvesting", "Storage"]
-    )
-
-    goals = st.multiselect(
-        "Goals",
-        ["High Yield", "Low Cost", "Organic",
-         "Water Saving", "Pest Control", "Soil Health"]
-    )
-
-    temperature = st.slider("AI Creativity", 0.2, 0.8, 0.4)
-
-    st.markdown("---")
-    weather_key = st.text_input("Weather API Key (Optional)")
-
-# -------------------------------------------------
-# WEATHER FUNCTION
-# -------------------------------------------------
-def get_weather(location, key):
-    if not key or not location:
+# =====================================================
+# WEATHER MODULE
+# =====================================================
+def fetch_weather(location, api_key):
+    if not api_key or not location:
         return None
     try:
-        url = f"http://api.openweathermap.org/data/2.5/weather?q={location}&appid={key}&units=metric"
+        url = f"http://api.openweathermap.org/data/2.5/weather?q={location}&appid={api_key}&units=metric"
         data = requests.get(url).json()
         return {
-            "Temp": data["main"]["temp"],
-            "Humidity": data["main"]["humidity"],
-            "Rain": data.get("rain", {}).get("1h", 0)
+            "temperature": data["main"]["temp"],
+            "humidity": data["main"]["humidity"],
+            "rainfall_last_hour": data.get("rain", {}).get("1h", 0)
         }
     except:
         return None
 
-location_query = f"{district},{state},{country}" if district else None
-weather_data = get_weather(location_query, weather_key)
+# =====================================================
+# SAFETY CLASSIFIER
+# =====================================================
+def classify_safety(text):
+    risk_keywords = ["high dosage", "toxic", "hazard", "danger"]
+    for word in risk_keywords:
+        if word in text.lower():
+            return "RED"
+    if "chemical" in text.lower():
+        return "YELLOW"
+    return "GREEN"
 
-if weather_data:
-    st.info(
-        f"🌦 Temp: {weather_data['Temp']}°C | "
-        f"Humidity: {weather_data['Humidity']}% | "
-        f"Rain (1h): {weather_data['Rain']} mm"
+# =====================================================
+# AI ORCHESTRATOR
+# =====================================================
+def run_ai_orchestrator(context_prompt, temperature):
+    response = client.models.generate_content(
+        model=MODEL_NAME,
+        contents=context_prompt,
+        config={
+            "temperature": temperature,
+            "max_output_tokens": 1000
+        }
     )
+    if hasattr(response, "text") and response.text:
+        return response.text
+    return None
 
-# -------------------------------------------------
+# =====================================================
+# SIDEBAR CONFIG
+# =====================================================
+with st.sidebar:
+    st.header("Farm Configuration")
+
+    country = st.selectbox("Country", ["India","Ghana","Canada","USA","Brazil","Australia"])
+    state = st.text_input("State / Province")
+    stage = st.selectbox("Crop Stage", ["Planning","Sowing","Growing","Harvesting","Storage"])
+    goals = st.multiselect("Goals",
+        ["High Yield","Low Cost","Organic","Water Saving","Pest Control","Soil Health"])
+    creativity = st.slider("AI Creativity",0.2,0.8,0.4)
+    weather_key = st.text_input("Weather API Key (Optional)")
+
+# =====================================================
+# WEATHER INJECTION
+# =====================================================
+weather_data = fetch_weather(state, weather_key)
+if weather_data:
+    st.info(f"🌦 Temp: {weather_data['temperature']}°C | Humidity: {weather_data['humidity']}% | Rain: {weather_data['rainfall_last_hour']}mm")
+
+# =====================================================
 # IMAGE UPLOAD
-# -------------------------------------------------
-uploaded_image = st.file_uploader(
-    "Upload crop image (optional)",
-    type=["jpg", "jpeg", "png"]
-)
+# =====================================================
+uploaded_image = st.file_uploader("Upload Crop Image (Optional)", type=["jpg","jpeg","png"])
 
-# -------------------------------------------------
+# =====================================================
 # FARM QUESTION
-# -------------------------------------------------
+# =====================================================
 question = st.text_area("Describe your farm issue")
 
-# -------------------------------------------------
-# GENERATE ADVICE
-# -------------------------------------------------
-if st.button("Generate Farm Advice"):
+# =====================================================
+# ENTERPRISE GENERATION
+# =====================================================
+if st.button("Generate Enterprise Farm Plan"):
 
-    if not state or not district:
-        st.warning("Select country, state and district.")
-    elif not question:
-        st.warning("Enter farm issue.")
+    if not state or not question:
+        st.warning("Please complete required fields.")
     else:
-        try:
-            base_prompt = f"""
-You are an expert agricultural advisor.
+        base_prompt = f"""
+You are AgroNova Enterprise AI.
 
+Return output STRICTLY in JSON format:
+
+{{
+  "recommendations":[
+    {{"action":"", "why":"", "risk":"LOW/MEDIUM/HIGH"}}
+  ],
+  "confidence_score": number_between_0_and_100
+}}
+
+Context:
 Country: {country}
 State: {state}
-District: {district}
-Crop Stage: {crop_stage}
-Goals: {', '.join(goals) if goals else 'General productivity'}
-Weather: {weather_data if weather_data else 'Not provided'}
+Stage: {stage}
+Goals: {', '.join(goals) if goals else 'General'}
+Weather: {weather_data if weather_data else 'Not available'}
 
-Question:
+User Question:
 {question}
 
-Provide EXACTLY 3 recommendations.
-
-Format:
-
-Recommendation 1:
-• Action:
-• Why:
-
-Recommendation 2:
-• Action:
-• Why:
-
-Recommendation 3:
-• Action:
-• Why:
-
 Use simple language.
-Avoid unsafe chemicals.
+Avoid unsafe chemical advice.
+Provide exactly 3 recommendations.
 """
 
-            contents = base_prompt
+        try:
+            # Low temperature version
+            low_output = run_ai_orchestrator(base_prompt, 0.3)
+            high_output = run_ai_orchestrator(base_prompt, 0.7)
 
-            if uploaded_image:
-                contents = [
-                    {"text": base_prompt},
-                    {
-                        "inline_data": {
-                            "mime_type": uploaded_image.type,
-                            "data": uploaded_image.getvalue()
-                        }
-                    }
-                ]
+            parsed = json.loads(low_output)
 
-            response = client.models.generate_content(
-                model=MODEL_NAME,
-                contents=contents,
-                config={
-                    "temperature": temperature,
-                    "max_output_tokens": 900
-                }
-            )
+            st.success("Enterprise Farm Plan Ready")
 
-            if hasattr(response, "text") and response.text:
-                result = response.text
-                st.success("Farm Plan Ready")
-                st.markdown(
-                    f'<div class="card">{result}</div>',
-                    unsafe_allow_html=True
-                )
+            for rec in parsed["recommendations"]:
+                st.markdown(f"""
+                <div class="recommendation">
+                <b>Action:</b> {rec["action"]}<br>
+                <b>Why:</b> {rec["why"]}<br>
+                <b>Risk Level:</b> {rec["risk"]}
+                </div>
+                """, unsafe_allow_html=True)
 
-                buffer = BytesIO()
-                doc = SimpleDocTemplate(buffer)
-                styles = getSampleStyleSheet()
-                elements = []
-
-                elements.append(
-                    Paragraph("AgroNova Farm Report", styles["Heading1"])
-                )
-                elements.append(Spacer(1, 0.3 * inch))
-                elements.append(
-                    Paragraph(result.replace("\n", "<br/>"),
-                              styles["Normal"])
-                )
-
-                doc.build(elements)
-                buffer.seek(0)
-
-                st.download_button(
-                    "Download PDF Report",
-                    buffer,
-                    file_name="AgroNova_Farm_Report.pdf",
-                    mime="application/pdf"
-                )
-
+            safety = classify_safety(low_output)
+            if safety == "GREEN":
+                st.markdown('<p class="safe">🟢 Safety Score: SAFE</p>', unsafe_allow_html=True)
+            elif safety == "YELLOW":
+                st.markdown('<p class="warn">🟡 Safety Score: MODERATE</p>', unsafe_allow_html=True)
             else:
-                st.error("No response received.")
+                st.markdown('<p class="danger">🔴 Safety Score: HIGH RISK</p>', unsafe_allow_html=True)
+
+            st.markdown(f"### 🔍 AI Confidence Score: {parsed['confidence_score']}%")
+
+            # Model comparison view
+            with st.expander("Model Comparison (0.3 vs 0.7)"):
+                st.write("### Conservative Output (0.3)")
+                st.code(low_output)
+                st.write("### Creative Output (0.7)")
+                st.code(high_output)
+
+            # Logging
+            log_entry = {
+                "timestamp": datetime.now(),
+                "country": country,
+                "state": state,
+                "confidence": parsed["confidence_score"],
+                "safety": safety
+            }
+            pd.DataFrame([log_entry]).to_csv("agronova_logs.csv", mode="a", header=False, index=False)
+
+            # PDF Export
+            buffer = BytesIO()
+            doc = SimpleDocTemplate(buffer)
+            styles = getSampleStyleSheet()
+            elements = []
+            elements.append(Paragraph("AgroNova Enterprise Farm Report", styles["Heading1"]))
+            elements.append(Spacer(1,0.3*inch))
+            elements.append(Paragraph(low_output.replace("\n","<br/>"), styles["Normal"]))
+            doc.build(elements)
+            buffer.seek(0)
+
+            st.download_button(
+                "Download Enterprise PDF Report",
+                buffer,
+                file_name="AgroNova_Enterprise_Report.pdf",
+                mime="application/pdf"
+            )
 
         except Exception as e:
             st.error("AI service unavailable.")
             st.code(str(e))
 
-# -------------------------------------------------
+# =====================================================
 # FOOTER
-# -------------------------------------------------
+# =====================================================
 st.markdown(f"""
 <hr>
 <p style="text-align:center;">
-AgroNova • AI Smart Farming Assistant • {datetime.now().year}
+AgroNova Enterprise AI Platform • {datetime.now().year}
 </p>
 """, unsafe_allow_html=True)
