@@ -2,8 +2,8 @@
 
 ### Generative AI Powered Smart Farming Assistant
 
-> Developed for *IDAI-1000428, Generative AI FA-2*  
-> By *Mann Paresh Patel*
+Developed for *IDAI-1000428, Generative AI FA-2*  
+ By *Mann Paresh Patel*
 
 ---
 
