@@ -135,24 +135,24 @@ IDAI-1000428-Mann-Paresh-Patel-Generative-AI-FA-2/
 git clone https://github.com/MannPatel15012009/IDAI-1000428-Mann-Paresh-Patel-Generative-AI-FA-2.git
 cd IDAI-1000428-Mann-Paresh-Patel-Generative-AI-FA-2
 ```
-Step 2: Install Dependencies
+### Step 2: Install Dependencies
 `pip install -r requirements.txt`
 
 If needed:
 
 `pip install streamlit google-genai requests pandas reportlab`
-Step 3: Configure API Keys
+### Step 3: Configure API Keys
 
 Create a .streamlit/secrets.toml file:
 ```
 GOOGLE_API_KEY="your_google_api_key_here"
 WEATHER_API_KEY="your_weather_api_key_here"
 ```
-Step 4: Run the Application
+### Step 4: Run the Application
 `streamlit run app.py`
-Application Workflow
+## Application Workflow
 
-User selects:
+### User selects:
 
 Country
 
@@ -162,7 +162,7 @@ Crop stage
 
 Farming goal
 
-Creativity level (Optional)
+### Creativity level (Optional)
 
 Weather API fetches live weather.
 The prompt is constructed dynamically.
@@ -170,7 +170,7 @@ Gemini generates a structured JSON response.
 Output is parsed and displayed neatly.
 Users can download the PDF report.
 
-Sample Output Format
+## Sample Output Format
 ```{
   "recommendations": [
     {
@@ -182,7 +182,7 @@ Sample Output Format
   "confidence_score": 85
 }
 ```
-Responsible AI Considerations
+## Responsible AI Considerations
 
 No automated irreversible decisions.
 
@@ -192,7 +192,7 @@ Human oversight is required.
 
 Designed as an advisory support tool only.
 
-Future Improvements
+## Future Improvements
 
 Multimodal AI integration (image-based crop diagnosis).
 
@@ -206,13 +206,13 @@ Multilingual support.
 
 AI-powered district-level recommendation system.
 
-Academic Context
+## Academic Context
 
 This project was developed as part of:
 
 IDAI-1000428, Generative AI Final Assessment (FA-2)
 
-It showcases:
+### It showcases:
 
 Prompt engineering
 
@@ -226,11 +226,11 @@ Responsible AI practices
 
 End-to-end deployment using Streamlit
 
-Contribution
+## Contribution
 
 Pull requests and improvements are welcome.
 
-To contribute:
+### To contribute:
 
 Fork the repository
 
@@ -240,15 +240,15 @@ Commit changes
 
 Open a pull request
 
-License
+## License
 
 This project is licensed under the MIT License.
 
-Author
+## Author
 
 Mann Paresh Patel
 Generative AI Enthusiast | Python Developer | Applied AI Explorer
 
-Support
+## Support
 
 If you find this project useful, consider giving it a star on GitHub!
