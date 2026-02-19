@@ -1,8 +1,8 @@
 """
 AgSaathi — Smart Farming Assistant
-Student: zene sophie anand | Reg: 1000442 
+Student:Mann Paresh Patel | Reg: 1000442 
 Assessment: FA-2 | Course: Generative AI | School: Aspee Nutan Academy
-Model: gemini-3.0-flash-preview-05-20 | Temperature: 0.2 | Max Tokens: 1000
+Model: gemini-3.0-flash-preview | Temperature: 0.2 | Max Tokens: 1000
 
 SECURITY: API key loaded from st.secrets — never hardcoded.
 Deploy: Add GEMINI_API_KEY to .streamlit/secrets.toml or Streamlit Cloud secrets.
@@ -1596,3 +1596,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
