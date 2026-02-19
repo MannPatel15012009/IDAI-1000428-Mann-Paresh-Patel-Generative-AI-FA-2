@@ -578,7 +578,7 @@ def parse_structured_response(raw: str) -> Optional[Dict]:
 
 
 def _safe_confidence(raw_score) -> int:
-    """FIX 8 — Enforce confidence_score is int 0–100, reject floats/strings."""
+    """FIX 8: Enforce confidence_score is int 0–100, reject floats/strings."""
     if isinstance(raw_score, bool):
         return 0
     if isinstance(raw_score, float):
@@ -1596,5 +1596,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
