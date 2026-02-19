@@ -1,7 +1,7 @@
 
 """
 AgSaathi — Smart Farming Assistant
-Student: Aditya Jitendra Kumar Sahani | Wacp no: 1000414
+Student:Mann Paresh Patel | Wacp no: 1000414
 Assessment: FA-2 | Course: Generative AI | School: Aspee Nutan Academy
 """
 
@@ -589,4 +589,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
