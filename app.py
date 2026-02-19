@@ -1,6 +1,6 @@
 """
 AgSaathi — Smart Farming Assistant
-Student:Mann Paresh Patel | Reg: 1000442 
+Student:Mann Paresh Patel | Reg: 1000428 
 Assessment: FA-2 | Course: Generative AI | School: Aspee Nutan Academy
 Model: gemini-3.0-flash-preview | Temperature: 0.2 | Max Tokens: 1000
 
@@ -548,7 +548,7 @@ Return ONLY this JSON (text values in {lang_name}, technical terms may be Englis
   ],
   "safety_note": "One critical safety warning for the farmer",
   "confidence_score": 80
-}}"""
+}}""
 
 
 def parse_structured_response(raw: str) -> Optional[Dict]:
@@ -612,7 +612,7 @@ def ai_farming_advice(query: str, soil_type: str = "Unknown",
 Return ONLY a JSON object, no other text.
 Question: "{query}" for {state}, {c}. Language: {lang}.
 Format:
-{{"location_analysis":"...","recommendations":[{{"action":"...","reason":"...","risk_level":"LOW"}},{{"action":"...","reason":"...","risk_level":"MEDIUM"}},{{"action":"...","reason":"...","risk_level":"LOW"}}],"safety_note":"...","confidence_score":75}}"""
+{{"location_analysis":"...","recommendations":[{{"action":"...","reason":"...","risk_level":"LOW"}},{{"action":"...","reason":"...","risk_level":"MEDIUM"}},{{"action":"...","reason":"...","risk_level":"LOW"}}],"safety_note":"...","confidence_score":75}}""
         raw2 = call_gemini(retry_prompt)
         structured = parse_structured_response(raw2)
         if structured:
@@ -700,8 +700,8 @@ def validate_response(query: str, response: str) -> Dict[str, bool]:
     prompt = f"""You are a quality checker for an agricultural AI assistant.
 Evaluate the AI response. Answer ONLY with the numbered format shown — no explanations.
 
-Question: "{query}"
-Response: "{response[:700]}"
+Question: {query}
+Response: {response[:700]}
 
 Answer EXACTLY in this format (number colon space YES or NO):
 1: YES
@@ -1596,4 +1596,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
