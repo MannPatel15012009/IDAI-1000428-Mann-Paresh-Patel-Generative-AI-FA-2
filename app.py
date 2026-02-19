@@ -395,7 +395,7 @@ def sidebar():
             ('home', '⌂', 'Dashboard'), ('crop_rec', '🌾', 'Crop Rec'),
             ('pest', '🐛', 'Pest'), ('soil', '🧪', 'Soil'),
             ('sustainable', '♻️', 'Sustainable'), ('weather', '🌦', 'Weather'),
-            ('validate', 'Validation'),
+            ('validate', '✅', 'Validation')
         ]
         for key, icon, label in nav_items:
             if st.button(f"{icon} {label}", use_container_width=True, key=f"nav_{key}"):
@@ -589,3 +589,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
