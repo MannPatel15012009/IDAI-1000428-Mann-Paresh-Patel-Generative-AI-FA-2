@@ -1,6 +1,6 @@
 """
 AgSaathi — Smart Farming Assistant
-Student: Mann Paresh Patel | Wacp no: 1000428
+Student: Mann Paresh Patel  | Wacp no: 1000428
 Assessment: FA-2 | Course: Generative AI | School: Aspee Nutan Academy
 """
 
@@ -8,7 +8,8 @@ import streamlit as st
 import google.generativeai as genai
 import json
 import re
-from typing import Dict, Optional
+from datetime import datetime
+from typing import Dict, Any, Optional
 
 # ── PAGE CONFIG ──────────────────────────────────────────────────────────────
 st.set_page_config(page_title="AgSaathi — Smart Farming Assistant", page_icon="🌿", layout="wide", initial_sidebar_state="expanded")
@@ -20,18 +21,12 @@ if not GEMINI_API_KEY:
     st.stop()
 
 genai.configure(api_key=GEMINI_API_KEY)
-MODEL_NAME = "gemini-2.0-flash" 
+MODEL_NAME = "gemini-3-flash-preview" 
 MODEL_TEMPERATURE = 0.3
 
 @st.cache_resource
 def get_model():
-    return genai.GenerativeModel(
-        model_name=MODEL_NAME, 
-        generation_config=genai.GenerationConfig(
-            temperature=MODEL_TEMPERATURE,
-            response_mime_type="application/json" # Forces valid JSON output
-        )
-    )
+    return genai.GenerativeModel(model_name=MODEL_NAME, generation_config=genai.GenerationConfig(temperature=MODEL_TEMPERATURE))
 
 # ── GEO DATA ────────────────────────────────────────────────────────────────
 GEO = {
@@ -40,24 +35,22 @@ GEO = {
     'Ghana 🇬🇭': {'languages': ['English'], 'states': ['Ashanti', 'Northern', 'Greater Accra', 'Volta']},
 }
 
+# ── SESSION STATE ───────────────────────────────────────────────────────────
+DEFAULTS = {'page': 'hero', 'country': None, 'state': None, 'language': 'Hindi', 'nav': 'home', 'stats': {'queries': 0}, 'onboarding_complete': False}
+for k, v in DEFAULTS.items():
+    if k not in st.session_state: st.session_state[k] = v
+
 # ── AI HELPER ───────────────────────────────────────────────────────────────
 def call_ai(prompt: str) -> Optional[Dict]:
     try:
-        response = get_model().generate_content(prompt)
-        if not response.parts:
-            st.error("⚠️ Response was blocked (likely by safety settings or an empty return).")
-            return None
-            
-        text = response.text.strip()
-        st.session_state.stats['queries'] += 1
-        return json.loads(text)
-        
-    except json.JSONDecodeError as e:
-        st.error(f"⚠️ JSON Parsing Error: {e}")
-        st.error(f"Raw text received: {text}")
+        resp = get_model().generate_content(prompt).text
+        text = re.sub(r'```json|```', '', resp).strip()
+        start, end = text.find('{'), text.rfind('}') + 1
+        if start != -1:
+            st.session_state.stats['queries'] += 1
+            return json.loads(text[start:end])
     except Exception as e:
-        st.error(f"⚠️ API Error: {str(e)}")
-        
+        st.error(f"⚠️ AI Parsing Error. Please try again.")
     return None
 
 def render_confidence_bar(score: int):
@@ -104,8 +97,7 @@ def page_hero():
     col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
         if st.button("🚀 GET STARTED", use_container_width=True):
-            st.session_state.page = 'country'
-            st.rerun()
+            st.session_state.page = 'country'; st.rerun()
 
 def page_country():
     st.markdown("<h1 style='text-align:center; padding-top:50px;'>Where is your farm?</h1>", unsafe_allow_html=True)
@@ -113,9 +105,7 @@ def page_country():
     for i, c in enumerate(['India 🇮🇳', 'Canada 🇨🇦', 'Ghana 🇬🇭']):
         with cols[i]:
             if st.button(c, use_container_width=True):
-                st.session_state.country = c
-                st.session_state.page = 'state'
-                st.rerun()
+                st.session_state.country, st.session_state.page = c, 'state'; st.rerun()
 
 def page_state():
     st.markdown(f"<h1 style='text-align:center; padding-top:50px;'>Region in {st.session_state.country}</h1>", unsafe_allow_html=True)
@@ -123,9 +113,7 @@ def page_state():
     with col2:
         sel = st.selectbox("Search State/Province", options=GEO[st.session_state.country]['states'], index=None)
         if st.button("CONFIRM LOCATION", disabled=not sel, use_container_width=True):
-            st.session_state.state = sel
-            st.session_state.page = 'language'
-            st.rerun()
+            st.session_state.state, st.session_state.page = sel, 'language'; st.rerun()
 
 def page_language():
     st.markdown("<h1 style='text-align:center; padding-top:50px;'>Preferred Language</h1>", unsafe_allow_html=True)
@@ -133,8 +121,7 @@ def page_language():
     for i, lang in enumerate(GEO[st.session_state.country]['languages']):
         with cols[i % 3]:
             if st.button(lang, use_container_width=True):
-                st.session_state.update({'language': lang, 'onboarding_complete': True, 'nav': 'home'})
-                st.rerun()
+                st.session_state.update({'language': lang, 'onboarding_complete': True, 'nav': 'home'}); st.rerun()
 
 def sidebar():
     with st.sidebar:
@@ -143,10 +130,8 @@ def sidebar():
         navs = [('home','⌂','Dashboard'), ('crop_rec','🌾','Crop Rec'), ('pest','🐛','Pest'), ('weather','🌦','Weather'), ('soil','🧪','Soil'), ('sustainable','♻️','Sustainable')]
         for k, i, l in navs:
             if st.button(f"{i} {l}", key=f"nav_{k}", use_container_width=True):
-                st.session_state.nav = k
-                st.rerun()
-        st.markdown("<hr>", unsafe_allow_html=True)
-        st.caption("Mann Patel| Reg 1000428")
+                st.session_state.nav = k; st.rerun()
+        st.markdown("<hr>", unsafe_allow_html=True); st.caption("Aditya Sahani | Reg 1000414")
 
 def render_home():
     sidebar()
@@ -156,9 +141,7 @@ def render_home():
     for i, (k, icon, l) in enumerate(feats):
         with f_cols[i]:
             st.markdown(f"<div class='feature-card'><div style='font-size:2.5rem;'>{icon}</div><b>{l}</b></div>", unsafe_allow_html=True)
-            if st.button("OPEN", key=f"go_{k}", use_container_width=True): 
-                st.session_state.nav = k
-                st.rerun()
+            if st.button("OPEN", key=f"go_{k}", use_container_width=True): st.session_state.nav = k; st.rerun()
 
 # ── 1. CROP RECOMMENDATION TAB ──────────────────────────────────────────────
 def render_crop_rec():
@@ -318,48 +301,20 @@ def render_sustainable():
                     st.markdown(f"<div class='card'><h4>⏳ Expected ROI Time</h4><p style='font-size:1.2rem; color:var(--wheat); font-weight:bold;'>{res.get('expected_roi_time')}</p></div>", unsafe_allow_html=True)
                     st.markdown(f"<div class='card'><h4>🌱 Environmental Impact</h4><p>{res.get('environmental_impact')}</p></div>", unsafe_allow_html=True)
 
-# ── APP ROUTING ───────────────────────────────────────────────
+# ── MAIN ROUTER ─────────────────────────────────────────────────────────────
 def main():
-    DEFAULTS = {
-        'page': 'hero', 
-        'country': None, 
-        'state': None, 
-        'language': 'Hindi', 
-        'nav': 'home', 
-        'stats': {'queries': 0}, 
-        'onboarding_complete': False
-    }
-    for k, v in DEFAULTS.items():
-        if k not in st.session_state: 
-            st.session_state[k] = v
-
     inject_css()
-    
     if not st.session_state.onboarding_complete:
-        if st.session_state.page == 'hero':
-            page_hero()
-        elif st.session_state.page == 'country':
-            page_country()
-        elif st.session_state.page == 'state':
-            page_state()
-        elif st.session_state.page == 'language':
-            page_language()
+        pages = {'hero': page_hero, 'country': page_country, 'state': page_state, 'language': page_language}
+        pages.get(st.session_state.page, page_hero)()
     else:
-        if st.session_state.nav == 'home':
-            render_home()
-        elif st.session_state.nav == 'crop_rec':
-            render_crop_rec()
-        elif st.session_state.nav == 'pest':
-            render_pest()
-        elif st.session_state.nav == 'weather':
-            render_weather()
-        elif st.session_state.nav == 'soil':
-            render_soil()
-        elif st.session_state.nav == 'sustainable':
-            render_sustainable()
+        nav = st.session_state.nav
+        if nav == 'home': render_home()
+        elif nav == 'crop_rec': render_crop_rec()
+        elif nav == 'pest': render_pest()
+        elif nav == 'weather': render_weather()
+        elif nav == 'soil': render_soil()
+        elif nav == 'sustainable': render_sustainable()
 
 if __name__ == "__main__":
     main()
-
-
-
