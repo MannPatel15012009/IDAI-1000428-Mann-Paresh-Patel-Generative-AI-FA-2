@@ -20,7 +20,7 @@ if not GEMINI_API_KEY:
     st.stop()
 
 genai.configure(api_key=GEMINI_API_KEY)
-MODEL_NAME = "gemini-2.5-flash" 
+MODEL_NAME = "gemini-2.0-flash" 
 MODEL_TEMPERATURE = 0.3
 
 @st.cache_resource
@@ -360,4 +360,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
