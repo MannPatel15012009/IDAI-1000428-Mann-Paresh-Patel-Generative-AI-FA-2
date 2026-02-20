@@ -1,6 +1,6 @@
 """
 AgSaathi — Smart Farming Assistant
-Student: zene sophie anand | Wacp no: 1000414
+Student: Mann Paresh Patel | Wacp no: 1000428
 Assessment: FA-2 | Course: Generative AI | School: Aspee Nutan Academy
 """
 
@@ -146,7 +146,7 @@ def sidebar():
                 st.session_state.nav = k
                 st.rerun()
         st.markdown("<hr>", unsafe_allow_html=True)
-        st.caption("Aditya Sahani | Reg 1000414")
+        st.caption("Mann Patel| Reg 1000428")
 
 def render_home():
     sidebar()
@@ -360,5 +360,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
