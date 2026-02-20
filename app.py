@@ -22,7 +22,7 @@ if not GEMINI_API_KEY:
 
 genai.configure(api_key=GEMINI_API_KEY)
 # Updated to a valid, fast public model
-MODEL_NAME = "gemini-1.5-flash" 
+MODEL_NAME = "gemini-3-flash-preview" 
 MODEL_TEMPERATURE = 0.3
 
 @st.cache_resource
@@ -348,4 +348,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
