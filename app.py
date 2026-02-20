@@ -27,34 +27,39 @@ MODEL_TEMPERATURE = 0.3
 
 @st.cache_resource
 def get_model():
-    return genai.GenerativeModel(model_name=MODEL_NAME, generation_config=genai.GenerationConfig(temperature=MODEL_TEMPERATURE))
-
-# ── GEO DATA ────────────────────────────────────────────────────────────────
-GEO = {
-    'India 🇮🇳': {'languages': ['English', 'Hindi'], 'states': ['Uttar Pradesh', 'Punjab', 'Bihar', 'Madhya Pradesh', 'Maharashtra', 'Gujarat']},
-    'Canada 🇨🇦': {'languages': ['English', 'French'], 'states': ['Ontario', 'Quebec', 'Saskatchewan', 'Alberta']},
-    'Ghana 🇬🇭': {'languages': ['English'], 'states': ['Ashanti', 'Northern', 'Greater Accra', 'Volta']},
-}
-
-# ── SESSION STATE ───────────────────────────────────────────────────────────
-DEFAULTS = {'page': 'hero', 'country': None, 'state': None, 'language': 'Hindi', 'nav': 'home', 'stats': {'queries': 0}, 'onboarding_complete': False}
-for k, v in DEFAULTS.items():
-    if k not in st.session_state: 
-        st.session_state[k] = v
+    return genai.GenerativeModel(
+        model_name=MODEL_NAME, 
+        generation_config=genai.GenerationConfig(
+            temperature=MODEL_TEMPERATURE,
+            response_mime_type="application/json"  # <-- This forces Gemini to ONLY output valid JSON
+        )
+    )
 
 # ── AI HELPER ───────────────────────────────────────────────────────────────
 def call_ai(prompt: str) -> Optional[Dict]:
     try:
-        resp = get_model().generate_content(prompt).text
-        text = re.sub(r'```json|```', '', resp).strip()
-        start, end = text.find('{'), text.rfind('}') + 1
-        if start != -1:
-            st.session_state.stats['queries'] += 1
-            return json.loads(text[start:end])
+        response = get_model().generate_content(prompt)
+        
+        # 1. Check if the response was blocked by safety filters
+        if not response.parts:
+            st.error("⚠️ Response was blocked (likely by safety settings or an empty return).")
+            return None
+            
+        text = response.text.strip()
+        
+        # 2. Parse the JSON
+        st.session_state.stats['queries'] += 1
+        return json.loads(text)
+        
+    except json.JSONDecodeError as e:
+        # If it's still failing to parse, this will show you exactly why
+        st.error(f"⚠️ JSON Parsing Error: {e}")
+        st.error(f"Raw text received: {text}")
     except Exception as e:
-        st.error(f"⚠️ AI Parsing Error. Please try again.")
+        # This will catch API Key issues, quota limits, or network errors
+        st.error(f"⚠️ API Error: {str(e)}")
+        
     return None
-
 def render_confidence_bar(score: int):
     color = "#27AE60" if score >= 80 else "#E67E22" if score >= 50 else "#C0392B"
     st.markdown(f"""
@@ -343,3 +348,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
