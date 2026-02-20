@@ -24,13 +24,13 @@ except Exception:
     GEMINI_API_KEY = None
 
 if not GEMINI_API_KEY:
-    st.error("⚠️ Gemini API key not found. Add GEMINI_API_KEY to Streamlit secrets.")
+    st.error("⚠️ Gemini API key not found.\n Add GEMINI_API_KEY to Streamlit secrets.")
     st.stop()
 
 genai.configure(api_key=GEMINI_API_KEY)
 
 # ✅ FIX 1: Valid model name (gemini-3-flash-preview doesn't exist)
-MODEL_NAME = "gemini-1.5-flash"
+MODEL_NAME = "gemini-2.5-pro"
 
 @st.cache_resource
 def get_model():
@@ -1199,3 +1199,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
