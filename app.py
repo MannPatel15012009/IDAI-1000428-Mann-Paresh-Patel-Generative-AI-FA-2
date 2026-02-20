@@ -32,7 +32,7 @@ genai.configure(api_key=GEMINI_API_KEY)
 # ✅ FIX 1: Valid model name (gemini-3-flash-preview doesn't exist)
 MODEL_NAME = "gemini-2.5-pro"
 
-@st.cache_resource
+@st.cache_resource(allow_output_mutation=True)
 def get_model():
     try:
         return genai.GenerativeModel(
@@ -1199,4 +1199,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
