@@ -160,7 +160,7 @@ Location: {state}, {country} | Crop: {crop} | Symptoms: "{symptoms}" | Duration:
 "risk_level": "LOW/MEDIUM/HIGH",
 "safety_note": "chemical safety warning",
 "confidence_score": 80
-}}"
+}}
 
 def prompt_weather(event, temp, crop, state, country, lang):
     return f"""You are a climate-adaptive farming advisor. Respond in {lang}. Return ONLY valid JSON with no extra text.
@@ -1201,6 +1201,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
