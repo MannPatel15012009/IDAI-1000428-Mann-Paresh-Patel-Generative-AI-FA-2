@@ -31,7 +31,7 @@ if not GEMINI_API_KEY:
 genai.configure(api_key=GEMINI_API_KEY)
 
 # ── MODEL CONFIG ────────────────────────────────────────────────────────────
-MODEL_NAME = "gemini-3-flash/preview" 
+MODEL_NAME = "gemini-3-flash-preview" 
 MODEL_TEMPERATURE = 0.3
 MODEL_MAX_TOKENS = 2048
 
@@ -359,4 +359,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
