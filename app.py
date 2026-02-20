@@ -318,11 +318,26 @@ def render_sustainable():
                     st.markdown(f"<div class='card'><h4>⏳ Expected ROI Time</h4><p style='font-size:1.2rem; color:var(--wheat); font-weight:bold;'>{res.get('expected_roi_time')}</p></div>", unsafe_allow_html=True)
                     st.markdown(f"<div class='card'><h4>🌱 Environmental Impact</h4><p>{res.get('environmental_impact')}</p></div>", unsafe_allow_html=True)
 
-# ── APP ROUTING (NEWLY ADDED) ───────────────────────────────────────────────
+# ── APP ROUTING ───────────────────────────────────────────────
 def main():
+    # 1. INITIALIZE SESSION STATE FIRST
+    DEFAULTS = {
+        'page': 'hero', 
+        'country': None, 
+        'state': None, 
+        'language': 'Hindi', 
+        'nav': 'home', 
+        'stats': {'queries': 0}, 
+        'onboarding_complete': False
+    }
+    for k, v in DEFAULTS.items():
+        if k not in st.session_state: 
+            st.session_state[k] = v
+
+    # 2. INJECT CSS
     inject_css()
     
-    # Handle routing based on session state
+    # 3. ROUTING LOGIC
     if not st.session_state.onboarding_complete:
         if st.session_state.page == 'hero':
             page_hero()
