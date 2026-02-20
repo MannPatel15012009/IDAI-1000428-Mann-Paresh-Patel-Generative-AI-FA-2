@@ -8,8 +8,7 @@ import streamlit as st
 import google.generativeai as genai
 import json
 import re
-from datetime import datetime
-from typing import Dict, Any, Optional
+from typing import Dict, Optional
 
 # ── PAGE CONFIG ──────────────────────────────────────────────────────────────
 st.set_page_config(page_title="AgSaathi — Smart Farming Assistant", page_icon="🌿", layout="wide", initial_sidebar_state="expanded")
@@ -21,8 +20,7 @@ if not GEMINI_API_KEY:
     st.stop()
 
 genai.configure(api_key=GEMINI_API_KEY)
-# Updated to a valid, fast public model
-MODEL_NAME = "gemini-3-flash-preview" 
+MODEL_NAME = "gemini-1.5-flash" 
 MODEL_TEMPERATURE = 0.3
 
 @st.cache_resource
@@ -31,35 +29,37 @@ def get_model():
         model_name=MODEL_NAME, 
         generation_config=genai.GenerationConfig(
             temperature=MODEL_TEMPERATURE,
-            response_mime_type="application/json"  # <-- This forces Gemini to ONLY output valid JSON
+            response_mime_type="application/json" # Forces valid JSON output
         )
     )
+
+# ── GEO DATA ────────────────────────────────────────────────────────────────
+GEO = {
+    'India 🇮🇳': {'languages': ['English', 'Hindi'], 'states': ['Uttar Pradesh', 'Punjab', 'Bihar', 'Madhya Pradesh', 'Maharashtra', 'Gujarat']},
+    'Canada 🇨🇦': {'languages': ['English', 'French'], 'states': ['Ontario', 'Quebec', 'Saskatchewan', 'Alberta']},
+    'Ghana 🇬🇭': {'languages': ['English'], 'states': ['Ashanti', 'Northern', 'Greater Accra', 'Volta']},
+}
 
 # ── AI HELPER ───────────────────────────────────────────────────────────────
 def call_ai(prompt: str) -> Optional[Dict]:
     try:
         response = get_model().generate_content(prompt)
-        
-        # 1. Check if the response was blocked by safety filters
         if not response.parts:
             st.error("⚠️ Response was blocked (likely by safety settings or an empty return).")
             return None
             
         text = response.text.strip()
-        
-        # 2. Parse the JSON
         st.session_state.stats['queries'] += 1
         return json.loads(text)
         
     except json.JSONDecodeError as e:
-        # If it's still failing to parse, this will show you exactly why
         st.error(f"⚠️ JSON Parsing Error: {e}")
         st.error(f"Raw text received: {text}")
     except Exception as e:
-        # This will catch API Key issues, quota limits, or network errors
         st.error(f"⚠️ API Error: {str(e)}")
         
     return None
+
 def render_confidence_bar(score: int):
     color = "#27AE60" if score >= 80 else "#E67E22" if score >= 50 else "#C0392B"
     st.markdown(f"""
@@ -320,7 +320,6 @@ def render_sustainable():
 
 # ── APP ROUTING ───────────────────────────────────────────────
 def main():
-    # 1. INITIALIZE SESSION STATE FIRST
     DEFAULTS = {
         'page': 'hero', 
         'country': None, 
@@ -334,10 +333,8 @@ def main():
         if k not in st.session_state: 
             st.session_state[k] = v
 
-    # 2. INJECT CSS
     inject_css()
     
-    # 3. ROUTING LOGIC
     if not st.session_state.onboarding_complete:
         if st.session_state.page == 'hero':
             page_hero()
@@ -363,5 +360,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
