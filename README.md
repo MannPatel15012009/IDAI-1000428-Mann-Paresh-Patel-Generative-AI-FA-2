@@ -5,8 +5,8 @@
 ![Gemini](https://img.shields.io/badge/Google_Gemini-AI-orange)
 ![Status](https://img.shields.io/badge/Assessment-FA--2-success)
 
-**Student Name:** Aditya Jitendra Kumar Sahani  
-**Student ID:** 1000414  
+**Student Name:** Mann Paresh Patel 
+**Student ID:** 1000428
 **Course:** Generative AI  
 **School:** Aspee Nutan Academy  
 **Assessment Type:** FA-2  
@@ -18,8 +18,8 @@
 
 | Resource | Link |
 |----------|------|
-| 🚀 Live App | [Open Live App](https://idai103-1000414-aditya-jitendra-kumar-sahani.streamlit.app/) |
-| 🎨 Canva Storyboard | [View Storyboard](https://www.canva.com/design/DAG987mWPuk/_1x5bAWimiHJD39bXwmLNw/view?utm_content=DAG987mWPuk&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=hc63e6bba5d) |
+| 🚀 Live App | [Open Live App](https://idai-1000428-mann-paresh-patel-generative-ai-fa-2-pgc8h8mbe2mj.streamlit.app/) |
+| 🎨 Canva Storyboard | [View Storyboard](https://www.canva.com/design/DAHBrkru6Rc/s33shL_sKpXyjt0UNFNnjA/edit?utm_content=DAHBrkru6Rc&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton) |
 
 ---
 
