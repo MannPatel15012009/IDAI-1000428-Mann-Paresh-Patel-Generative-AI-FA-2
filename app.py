@@ -146,7 +146,7 @@ Farmer Goal: "{goal}"
 ],
 "market_note": "overall profit tip",
 "confidence_score": 85
-}}"""
+}}
 
 def prompt_pest(crop, symptoms, duration, state, country, lang):
     return f"""You are a plant disease diagnostic assistant. Respond in {lang}. Return ONLY valid JSON with no extra text.
@@ -160,7 +160,7 @@ Location: {state}, {country} | Crop: {crop} | Symptoms: "{symptoms}" | Duration:
 "risk_level": "LOW/MEDIUM/HIGH",
 "safety_note": "chemical safety warning",
 "confidence_score": 80
-}}"""
+}}"
 
 def prompt_weather(event, temp, crop, state, country, lang):
     return f"""You are a climate-adaptive farming advisor. Respond in {lang}. Return ONLY valid JSON with no extra text.
@@ -432,7 +432,9 @@ li[role="option"]:hover,[data-baseweb="option"]:hover{background:rgba(212,168,83
     color:var(--wheat) !important; margin-bottom:10px;
 }
 </style>
-""", unsafe_allow_html=True)
+"""
+, unsafe_allow_html=True)
+
 
 # ── AUTH SIDEBAR ──────────────────────────────────────────────────────────────
 def auth_sidebar():
@@ -1199,5 +1201,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
