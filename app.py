@@ -299,4 +299,5 @@ def render_sustainable():
                     st.markdown("<div class='card'><h4>⚙️ Step-by-Step Implementation</h4><ol>" + "".join([f"<li style='margin-bottom:10px;'>{s}</li>" for s in res.get('implementation_steps',[])]) + "</ol></div>", unsafe_allow_html=True)
                 with c2:
                     st.markdown(f"<div class='card'><h4>⏳ Expected ROI Time</h4><p style='font-size:1.2rem; color:var(--wheat); font-weight:bold;'>{res.get('expected_roi_time')}</p></div>", unsafe_allow_html=True)
-                    st.markdown(f"<div class='card'><h4>🌱 Environmental Impact</h4><p>{res.get('environmental_impact')}</p></div>", unsafe_allow_h
+                    st.markdown(f"<div class='card'><h4>🌱 Environmental Impact</h4><p>{res.get('environmental_impact')}</p></div>", unsafe_allow_html=True)
+
