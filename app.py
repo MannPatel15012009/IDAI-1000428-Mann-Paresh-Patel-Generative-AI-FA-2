@@ -132,11 +132,11 @@ def call_gemini(prompt: str) -> str:
         st.error(f"❌ API Error: {str(e)[:200]}")
         return ""
 
-# ── PROMPT TEMPLATES ──────────────────────────────────────────────────────────
+# ── PROMPT TEMPLATES ──────────────────────────────────────────────────────────#
 def prompt_crop(goal, state, country, soil, water, season, lang):
     return f"""You are an agricultural advisor. Respond in {lang}. Return ONLY valid JSON with no extra text.
 Country: {country} | State: {state} | Soil: {soil} | Water: {water} | Season: {season}
-Farmer Goal: "{goal}"
+Farmer Goal: {goal}
 {{
 "location_analysis": "brief region suitability text",
 "crops": [
@@ -146,11 +146,12 @@ Farmer Goal: "{goal}"
 ],
 "market_note": "overall profit tip",
 "confidence_score": 85
-}}
+}}"""
+
 
 def prompt_pest(crop, symptoms, duration, state, country, lang):
     return f"""You are a plant disease diagnostic assistant. Respond in {lang}. Return ONLY valid JSON with no extra text.
-Location: {state}, {country} | Crop: {crop} | Symptoms: "{symptoms}" | Duration: {duration}
+Location: {state}, {country} | Crop: {crop} | Symptoms: {symptoms}| Duration: {duration}
 {{
 "diagnosis": "most likely disease or pest name",
 "why_this_fits": "explanation matching symptoms",
@@ -160,7 +161,8 @@ Location: {state}, {country} | Crop: {crop} | Symptoms: "{symptoms}" | Duration:
 "risk_level": "LOW/MEDIUM/HIGH",
 "safety_note": "chemical safety warning",
 "confidence_score": 80
-}}
+}}"""
+
 
 def prompt_weather(event, temp, crop, state, country, lang):
     return f"""You are a climate-adaptive farming advisor. Respond in {lang}. Return ONLY valid JSON with no extra text.
@@ -175,6 +177,7 @@ Location: {state}, {country} | Weather: {event} | Temp: {temp}°C | Crop: {crop}
 "confidence_score": 82
 }}"""
 
+
 def prompt_soil(ph, n, p, k, om, stype, state, country, lang):
     return f"""You are a soil science expert. Respond in {lang}. Return ONLY valid JSON with no extra text.
 Location: {state}, {country} | pH: {ph} | N: {n} | P: {p} | K: {k} | Organic Matter: {om}% | Type: {stype}
@@ -188,6 +191,7 @@ Location: {state}, {country} | pH: {ph} | N: {n} | P: {p} | K: {k} | Organic Mat
 "safety_note": "precaution",
 "confidence_score": 88
 }}"""
+
 
 def prompt_sustainable(practice, farm_size, budget, state, country, lang):
     return f"""You are a sustainable agriculture advisor. Respond in {lang}. Return ONLY valid JSON with no extra text.
@@ -1201,6 +1205,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
